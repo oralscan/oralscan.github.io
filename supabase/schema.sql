@@ -34,18 +34,24 @@ language sql stable security definer set search_path = public as $$
   select exists(select 1 from perfis where id = auth.uid() and papel = 'admin' and ativo);
 $$;
 
+-- e-mails que viram administradores automaticamente ao se cadastrar
+-- (adicione com: insert into public.admins_convidados values ('email@exemplo.com');)
+create table if not exists public.admins_convidados (email text primary key);
+alter table public.admins_convidados enable row level security;
+
 -- cria o perfil automaticamente quando alguém se cadastra
 create or replace function public.novo_usuario() returns trigger
 language plpgsql security definer set search_path = public as $$
 declare m jsonb := coalesce(new.raw_user_meta_data, '{}'::jsonb);
 begin
   insert into perfis (id, nome, cro, cro_uf, cpf_cnpj, clinica, telefone, whatsapp, email,
-                      endereco, bairro, cidade, cep, consentimento_lgpd)
+                      endereco, bairro, cidade, cep, consentimento_lgpd, papel)
   values (new.id, coalesce(m->>'nome',''), coalesce(m->>'cro',''), coalesce(m->>'cro_uf',''),
           coalesce(m->>'cpf_cnpj',''), coalesce(m->>'clinica',''), coalesce(m->>'telefone',''),
           coalesce(m->>'whatsapp',''), new.email, coalesce(m->>'endereco',''),
           coalesce(m->>'bairro',''), coalesce(m->>'cidade',''), coalesce(m->>'cep',''),
-          case when (m->>'consentimento') = 'true' then now() end)
+          case when (m->>'consentimento') = 'true' then now() end,
+          case when exists (select 1 from admins_convidados where lower(email) = lower(new.email)) then 'admin' else 'dentista' end)
   on conflict (id) do nothing;
   return new;
 end $$;
