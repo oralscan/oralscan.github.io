@@ -8,10 +8,28 @@ const UFS = 'AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO R
 function Moldura({ children }) {
   return (
     <div className="acesso">
-      <div className="acesso-arte"><img src="./logo-completa.jpg" alt="Oral Scan – Dra. Tamires Bueno" /></div>
+      <div className="acesso-arte">
+        <span className="arte-circulo c1" /><span className="arte-circulo c2" /><span className="arte-circulo c3" />
+        <div className="arte-conteudo">
+          <img src="./icon.svg" alt="" />
+          <div className="marca-nome">ORAL SCAN</div>
+          <div className="marca-sub">Dra. Tamires Bueno</div>
+          <h2 className="arte-titulo">Escaneamento intraoral com <em>precisão</em> e cuidado.</h2>
+          <p className="suave">Agende, acompanhe e organize seus escaneamentos em um só lugar.</p>
+          <ul className="arte-lista">
+            <li>Na clínica ou no seu consultório</li>
+            <li>Horários reais, sem conflito de agenda</li>
+            <li>Créditos e notas fiscais sempre à mão</li>
+          </ul>
+        </div>
+      </div>
       <div className="acesso-form">
         <div className="acesso-caixa">
-          <img className="acesso-logo" src="./logo-completa.jpg" alt="Oral Scan – Dra. Tamires Bueno" />
+          <div className="acesso-topo">
+            <img src="./icon.svg" alt="" />
+            <div className="marca-nome">ORAL SCAN</div>
+            <div className="marca-sub">Dra. Tamires Bueno</div>
+          </div>
           {children}
         </div>
       </div>

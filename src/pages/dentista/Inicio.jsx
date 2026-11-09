@@ -21,7 +21,7 @@ export default function Inicio() {
   return (
     <div className="pilha">
       <div>
-        <h1>Olá, {primeiroNome || 'doutor(a)'} 👋</h1>
+        <h1>Olá, {primeiroNome || "doutor(a)"}</h1>
         <p className="suave">Seu painel de escaneamentos intraorais.</p>
       </div>
 
@@ -29,7 +29,7 @@ export default function Inicio() {
         <div className="linha-entre">
           <div>
             <div className="suave pequeno">Créditos disponíveis</div>
-            <div style={{ fontFamily: 'Montserrat', fontSize: '2.6rem', fontWeight: 800, lineHeight: 1 }}>{r.disponiveis}</div>
+            <div className="numero-grande">{r.disponiveis}</div>
             {r.proxVencimento && <div className="suave pequeno mt">Próximo vencimento: {dataYmdBR(r.proxVencimento)}</div>}
             {r.vencidos > 0 && <div className="suave pequeno">{r.vencidos} crédito(s) vencido(s)</div>}
           </div>
