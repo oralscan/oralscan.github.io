@@ -80,6 +80,10 @@ export default function Vitrine() {
               <Link to="/cadastro" className="btn btn-primario vt-btn-grande">Quero agendar</Link>
               <a href="#como-funciona" className="btn vt-btn-grande" onClick={rolarPara('como-funciona')}>Ver como funciona</a>
             </div>
+            <div className="vt-assina">
+              <img src="./dra-tamires-avatar.webp" alt="Dra. Tamires Bueno" width="52" height="52" />
+              <span>Atendimento feito pessoalmente pela<b>Dra. Tamires De Luccas Bueno</b></span>
+            </div>
             <ul className="vt-credenciais">
               <li><b>Mestre e Doutora</b><span>em Dentística · FOB-USP</span></li>
               <li><b>Especialista</b><span>em Dentística · Centrinho</span></li>
@@ -186,7 +190,13 @@ export default function Vitrine() {
       {/* ---------- sobre ---------- */}
       <section className="vt-secao vt-secao-nude">
         <div className="vt-largura vt-sobre-grade">
-          <div className="vt-monograma" aria-hidden="true"><span>TB</span></div>
+          <figure className="vt-foto">
+            <picture>
+              <source srcSet="./dra-tamires.webp" type="image/webp" />
+              <img src="./dra-tamires.jpg" alt="Dra. Tamires De Luccas Bueno, cirurgiã-dentista" width="720" height="1082" loading="lazy" decoding="async" />
+            </picture>
+            <figcaption className="vt-foto-selo"><b>Prof.ª Dr.ª</b><span>CRO-SP 98.138</span></figcaption>
+          </figure>
           <div>
             <span className="vt-sobre">Quem atende</span>
             <h2>Dra. Tamires De Luccas Bueno</h2>
