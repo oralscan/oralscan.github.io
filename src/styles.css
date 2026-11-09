@@ -386,3 +386,4 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-sp
 @media (hover: hover) and (pointer: fine) { .senha-olho:hover { background: var(--rose-claro); color: var(--texto); } }
 .dica-erro { color: var(--vermelho); font-weight: 600; }
 .dica-ok { color: var(--verde); font-weight: 600; }
+.dica-aviso { color: var(--amarelo); font-weight: 600; }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../lib/api.js'
 import { Campo, CampoSenha, Marca, useAviso, useDados, Carregando } from '../components/ui.jsx'
@@ -83,7 +83,7 @@ export function CamposPerfil({ p, set, comEmail = true }) {
       <CampoDoc valor={p.cpf_cnpj} onChange={m('cpf_cnpj', mascaraDoc)} />
       <Campo rotulo="Nome da clínica *"><input required value={p.clinica} onChange={m('clinica')} /></Campo>
       <Campo rotulo="Telefone"><input type="tel" inputMode="tel" value={mascaraFone(p.telefone)} onChange={m('telefone', mascaraFone)} placeholder="(14) 3333-4444" /></Campo>
-      <Campo rotulo="WhatsApp *"><input type="tel" inputMode="tel" required minLength={14} value={mascaraFone(p.whatsapp)} onChange={m('whatsapp', mascaraFone)} placeholder="(14) 99999-9999" /></Campo>
+      <Campo rotulo="WhatsApp *"><input type="tel" inputMode="tel" required value={mascaraFone(p.whatsapp)} onChange={m('whatsapp', mascaraFone)} placeholder="(14) 99999-9999" /></Campo>
       {comEmail && <Campo rotulo="E-mail *"><input type="email" required value={p.email} onChange={m('email')} /></Campo>}
       <Campo rotulo="Endereço da clínica *" largo><input required value={p.endereco} onChange={m('endereco')} placeholder="Rua, número, sala" /></Campo>
       <Campo rotulo="Bairro"><input value={p.bairro} onChange={m('bairro')} /></Campo>
@@ -93,17 +93,17 @@ export function CamposPerfil({ p, set, comEmail = true }) {
   )
 }
 
+// Só avisa: nunca impede o cadastro (o número pode ser conferido depois pela clínica)
 function CampoDoc({ valor, onChange }) {
-  const ref = useRef(null)
   const texto = mascaraDoc(valor)
   const estado = validarDoc(texto)
   const qtd = soDigitos(texto).length
-  const erro = estado === 'invalido' ? 'Número inválido — confira os dígitos.'
-    : qtd > 0 && qtd !== 11 && qtd !== 14 ? 'Digite o CPF (11 dígitos) ou o CNPJ (14 dígitos).' : ''
-  useEffect(() => { ref.current?.setCustomValidity(qtd > 0 && erro ? erro : '') }, [erro, qtd])
+  const dica = estado === 'invalido' ? <span className="dica-aviso">Confira os dígitos — parece haver um número trocado.</span>
+    : estado === 'ok' ? <span className="dica-ok">{qtd === 11 ? 'CPF' : 'CNPJ'} válido</span>
+    : 'Só números — a pontuação entra sozinha.'
   return (
-    <Campo rotulo="CPF ou CNPJ da clínica *" dica={estado === 'invalido' ? <span className="dica-erro">{erro}</span> : estado === 'ok' ? <span className="dica-ok">{qtd === 11 ? 'CPF' : 'CNPJ'} válido</span> : 'Só números — a pontuação entra sozinha.'}>
-      <input ref={ref} required value={texto} onChange={onChange} inputMode="numeric" placeholder="000.000.000-00" maxLength={18} />
+    <Campo rotulo="CPF ou CNPJ da clínica *" dica={dica}>
+      <input required value={texto} onChange={onChange} inputMode="numeric" placeholder="000.000.000-00" maxLength={18} />
     </Campo>
   )
 }
