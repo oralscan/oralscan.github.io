@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { api } from '../../lib/api.js'
 import { Campo, Carregando, Selo, useAviso, useDados } from '../../components/ui.jsx'
 import { DIAS } from '../../lib/tempo.js'
+import { mascaraFone } from '../../lib/util.js'
 
 export default function Configuracoes() {
   const avisar = useAviso()
@@ -62,7 +63,7 @@ export default function Configuracoes() {
         <h2 className="mt">Dados da clínica</h2>
         <div className="form">
           <Campo rotulo="Endereço da sede (onde fica o scanner)" largo><input value={cfg.endereco_sede} onChange={txt('endereco_sede')} /></Campo>
-          <Campo rotulo="WhatsApp da clínica" dica="Recebe confirmações e comprovantes"><input value={cfg.whatsapp_clinica} onChange={txt('whatsapp_clinica')} placeholder="11999999999" /></Campo>
+          <Campo rotulo="WhatsApp da clínica" dica="Recebe confirmações e comprovantes"><input type="tel" inputMode="tel" value={mascaraFone(cfg.whatsapp_clinica)} onChange={(ev) => txt('whatsapp_clinica')({ target: { value: mascaraFone(ev.target.value) } })} placeholder="(14) 99999-9999" /></Campo>
           <Campo rotulo="Chave PIX (reserva)" dica="Usada só se o Mercado Pago não estiver ligado; aí você confirma o pagamento manualmente em Vendas."><input value={cfg.chave_pix} onChange={txt('chave_pix')} /></Campo>
           <Campo rotulo="Política de privacidade (opcional)" dica="Vazio = texto padrão LGPD do app" largo><textarea rows={5} value={cfg.politica_privacidade} onChange={txt('politica_privacidade')} /></Campo>
         </div>

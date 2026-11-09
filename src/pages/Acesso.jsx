@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../lib/api.js'
-import { Campo, Marca, useAviso, useDados, Carregando } from '../components/ui.jsx'
+import { Campo, CampoSenha, Marca, useAviso, useDados, Carregando } from '../components/ui.jsx'
+import { mascaraDoc, mascaraFone, mascaraCep, validarDoc, soDigitos } from '../lib/util.js'
 
 const UFS = 'AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO'.split(' ')
 
@@ -55,7 +56,7 @@ export function Entrar() {
         <p className="suave">Agende seus escaneamentos intraorais em poucos toques.</p>
         <form className="pilha" onSubmit={enviar}>
           <Campo rotulo="E-mail"><input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></Campo>
-          <Campo rotulo="Senha"><input type="password" autoComplete="current-password" required value={senha} onChange={(e) => setSenha(e.target.value)} /></Campo>
+          <CampoSenha value={senha} onChange={(e) => setSenha(e.target.value)} />
           {erro && <div className="alerta alerta-erro">{erro}</div>}
           <button className="btn btn-primario btn-bloco" disabled={enviando}>{enviando ? 'Entrando…' : 'Entrar'}</button>
         </form>
@@ -71,7 +72,7 @@ export function Entrar() {
 export const PERFIL_VAZIO = { nome: '', cro: '', cro_uf: 'SP', cpf_cnpj: '', clinica: '', telefone: '', whatsapp: '', email: '', endereco: '', bairro: '', cidade: '', cep: '' }
 
 export function CamposPerfil({ p, set, comEmail = true }) {
-  const m = (k) => (e) => set({ ...p, [k]: e.target.value })
+  const m = (k, mascara) => (e) => set({ ...p, [k]: mascara ? mascara(e.target.value) : e.target.value })
   return (
     <div className="form">
       <Campo rotulo="Nome completo *" largo><input required value={p.nome} onChange={m('nome')} /></Campo>
@@ -79,16 +80,31 @@ export function CamposPerfil({ p, set, comEmail = true }) {
       <Campo rotulo="Estado do CRO *">
         <select required value={p.cro_uf} onChange={m('cro_uf')}>{UFS.map((u) => <option key={u}>{u}</option>)}</select>
       </Campo>
-      <Campo rotulo="CPF ou CNPJ da clínica *"><input required value={p.cpf_cnpj} onChange={m('cpf_cnpj')} inputMode="numeric" /></Campo>
+      <CampoDoc valor={p.cpf_cnpj} onChange={m('cpf_cnpj', mascaraDoc)} />
       <Campo rotulo="Nome da clínica *"><input required value={p.clinica} onChange={m('clinica')} /></Campo>
-      <Campo rotulo="Telefone"><input type="tel" value={p.telefone} onChange={m('telefone')} /></Campo>
-      <Campo rotulo="WhatsApp *"><input type="tel" required value={p.whatsapp} onChange={m('whatsapp')} placeholder="(11) 99999-9999" /></Campo>
+      <Campo rotulo="Telefone"><input type="tel" inputMode="tel" value={mascaraFone(p.telefone)} onChange={m('telefone', mascaraFone)} placeholder="(14) 3333-4444" /></Campo>
+      <Campo rotulo="WhatsApp *"><input type="tel" inputMode="tel" required minLength={14} value={mascaraFone(p.whatsapp)} onChange={m('whatsapp', mascaraFone)} placeholder="(14) 99999-9999" /></Campo>
       {comEmail && <Campo rotulo="E-mail *"><input type="email" required value={p.email} onChange={m('email')} /></Campo>}
       <Campo rotulo="Endereço da clínica *" largo><input required value={p.endereco} onChange={m('endereco')} placeholder="Rua, número, sala" /></Campo>
       <Campo rotulo="Bairro"><input value={p.bairro} onChange={m('bairro')} /></Campo>
       <Campo rotulo="Cidade *"><input required value={p.cidade} onChange={m('cidade')} /></Campo>
-      <Campo rotulo="CEP"><input value={p.cep} onChange={m('cep')} inputMode="numeric" /></Campo>
+      <Campo rotulo="CEP"><input value={mascaraCep(p.cep)} onChange={m('cep', mascaraCep)} inputMode="numeric" placeholder="00000-000" /></Campo>
     </div>
+  )
+}
+
+function CampoDoc({ valor, onChange }) {
+  const ref = useRef(null)
+  const texto = mascaraDoc(valor)
+  const estado = validarDoc(texto)
+  const qtd = soDigitos(texto).length
+  const erro = estado === 'invalido' ? 'Número inválido — confira os dígitos.'
+    : qtd > 0 && qtd !== 11 && qtd !== 14 ? 'Digite o CPF (11 dígitos) ou o CNPJ (14 dígitos).' : ''
+  useEffect(() => { ref.current?.setCustomValidity(qtd > 0 && erro ? erro : '') }, [erro, qtd])
+  return (
+    <Campo rotulo="CPF ou CNPJ da clínica *" dica={estado === 'invalido' ? <span className="dica-erro">{erro}</span> : estado === 'ok' ? <span className="dica-ok">{qtd === 11 ? 'CPF' : 'CNPJ'} válido</span> : 'Só números — a pontuação entra sozinha.'}>
+      <input ref={ref} required value={texto} onChange={onChange} inputMode="numeric" placeholder="000.000.000-00" maxLength={18} />
+    </Campo>
   )
 }
 
@@ -130,7 +146,7 @@ export function Cadastro() {
         <form className="pilha" onSubmit={enviar}>
           <CamposPerfil p={p} set={setP} />
           <div className="form">
-            <Campo rotulo="Crie uma senha *" dica="Mínimo de 6 caracteres"><input type="password" autoComplete="new-password" required value={senha} onChange={(e) => setSenha(e.target.value)} /></Campo>
+            <CampoSenha rotulo="Crie uma senha *" dica="Mínimo de 6 caracteres" autoComplete="new-password" minLength={6} value={senha} onChange={(e) => setSenha(e.target.value)} />
           </div>
           <label className="check">
             <input type="checkbox" checked={aceite} onChange={(e) => setAceite(e.target.checked)} />
@@ -183,7 +199,7 @@ export function NovaSenha() {
       <div className="cartao">
         <h1>Nova senha</h1>
         <form className="pilha" onSubmit={enviar}>
-          <Campo rotulo="Nova senha" dica="Mínimo de 6 caracteres"><input type="password" minLength={6} required value={senha} onChange={(e) => setSenha(e.target.value)} /></Campo>
+          <CampoSenha rotulo="Nova senha" dica="Mínimo de 6 caracteres" autoComplete="new-password" minLength={6} value={senha} onChange={(e) => setSenha(e.target.value)} />
           <button className="btn btn-primario">Salvar</button>
         </form>
       </div>

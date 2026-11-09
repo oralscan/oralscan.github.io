@@ -375,3 +375,14 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-sp
   body { background: #fff; }
   .cartao, .kpi, .tabela-caixa { box-shadow: none; break-inside: avoid; }
 }
+
+/* ---------- senha com mostrar/ocultar ---------- */
+.senha { position: relative; }
+.senha input { padding-right: 52px; }
+.senha-olho { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 42px; height: 38px; display: grid; place-items: center; border: 0; background: none; border-radius: 10px; color: var(--suave); cursor: pointer; transition: color 150ms ease, background-color 150ms ease, transform 160ms var(--ease-out); touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+.senha-olho:active { transform: translateY(-50%) scale(0.92); }
+.senha-olho[aria-pressed="true"] { color: var(--primaria); }
+.senha-olho:focus-visible { outline: 2px solid var(--primaria); outline-offset: 1px; }
+@media (hover: hover) and (pointer: fine) { .senha-olho:hover { background: var(--rose-claro); color: var(--texto); } }
+.dica-erro { color: var(--vermelho); font-weight: 600; }
+.dica-ok { color: var(--verde); font-weight: 600; }

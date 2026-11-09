@@ -3,7 +3,7 @@ import { api } from '../../lib/api.js'
 import { Campo, Carregando, Modal, Selo, useAviso, useDados, Vazio } from '../../components/ui.jsx'
 import { CamposPerfil, PERFIL_VAZIO } from '../Acesso.jsx'
 import { hoje, dataCurta } from '../../lib/tempo.js'
-import { resumoCreditos, linkWhats } from '../../lib/util.js'
+import { resumoCreditos, linkWhats, mascaraFone, mascaraDoc } from '../../lib/util.js'
 
 export default function Dentistas() {
   const avisar = useAviso()
@@ -53,8 +53,8 @@ export default function Dentistas() {
                 return (
                   <tr key={p.id}>
                     <td><strong>{p.nome || '(sem nome)'}</strong><div className="suave pequeno">{p.clinica}{p.cidade ? ` · ${p.cidade}` : ''}</div></td>
-                    <td>{p.cro ? `${p.cro}/${p.cro_uf}` : '—'}</td>
-                    <td className="pequeno">{p.email}<div>{p.whatsapp && <a href={linkWhats(p.whatsapp, `Olá, ${p.nome}!`)} target="_blank" rel="noopener">{p.whatsapp}</a>}</div></td>
+                    <td>{p.cro ? `${p.cro}/${p.cro_uf}` : '—'}{p.cpf_cnpj && <div className="suave pequeno">{mascaraDoc(p.cpf_cnpj)}</div>}</td>
+                    <td className="pequeno">{p.email}<div>{p.whatsapp && <a href={linkWhats(p.whatsapp, `Olá, ${p.nome}!`)} target="_blank" rel="noopener">{mascaraFone(p.whatsapp)}</a>}</div></td>
                     <td className="num">{r.disponiveis}{r.vencidos > 0 && <div className="suave pequeno">{r.vencidos} venc.</div>}</td>
                     <td className="num">{n}</td>
                     <td>

@@ -57,6 +57,31 @@ export function Campo({ rotulo, dica, children, largo }) {
   )
 }
 
+/** Campo de senha com botão para mostrar/ocultar o que foi digitado. */
+export function CampoSenha({ rotulo = 'Senha', dica, value, onChange, autoComplete = 'current-password', minLength, required = true }) {
+  const [ver, setVer] = useState(false)
+  return (
+    <Campo rotulo={rotulo} dica={dica}>
+      <div className="senha">
+        <input
+          type={ver ? 'text' : 'password'} autoComplete={autoComplete} required={required} minLength={minLength}
+          value={value} onChange={onChange} autoCapitalize="none" autoCorrect="off" spellCheck={false}
+        />
+        <button
+          type="button" className="senha-olho" onClick={() => setVer((v) => !v)}
+          aria-label={ver ? 'Ocultar senha' : 'Mostrar senha'} aria-pressed={ver} title={ver ? 'Ocultar senha' : 'Mostrar senha'}
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" />
+            <circle cx="12" cy="12" r="3" />
+            {ver && <path d="M4 4l16 16" />}
+          </svg>
+        </button>
+      </div>
+    </Campo>
+  )
+}
+
 export function Kpi({ rotulo, valor, detalhe, destaque }) {
   return (
     <div className={`kpi ${destaque ? 'kpi-destaque' : ''}`}>

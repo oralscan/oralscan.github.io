@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../../lib/api.js'
 import { useSessao } from '../../App.jsx'
-import { Campo, useAviso } from '../../components/ui.jsx'
+import { Campo, CampoSenha, useAviso } from '../../components/ui.jsx'
 import { CamposPerfil } from '../Acesso.jsx'
 
 export default function Perfil() {
@@ -34,7 +34,7 @@ export default function Perfil() {
       <form className="cartao pilha" onSubmit={trocarSenha}>
         <h2>Alterar senha</h2>
         <div className="form">
-          <Campo rotulo="Nova senha" dica="Mínimo de 6 caracteres"><input type="password" minLength={6} required value={senha} onChange={(e) => setSenha(e.target.value)} autoComplete="new-password" /></Campo>
+          <CampoSenha rotulo="Nova senha" dica="Mínimo de 6 caracteres" autoComplete="new-password" minLength={6} value={senha} onChange={(e) => setSenha(e.target.value)} />
         </div>
         <div><button className="btn">Alterar senha</button></div>
       </form>
