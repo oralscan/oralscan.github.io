@@ -591,3 +591,34 @@ drop trigger if exists venda_para_planilha on public.compras;
 create trigger venda_para_planilha after update of status on public.compras
   for each row when (new.status is distinct from old.status and new.status in ('pago','estornado','cancelado'))
   execute function public.enviar_venda_planilha();
+
+-- =====================================================================
+-- INTEGRAÇÃO: cadastros de dentistas -> aba "Dentistas" da mesma planilha
+-- (captação de leads). Usa a mesma URL/token de public.integracoes.
+-- =====================================================================
+create or replace function public.enviar_dentista_planilha() returns trigger
+language plpgsql security definer set search_path = public, extensions as $fn$
+declare i integracoes%rowtype;
+begin
+  select * into i from integracoes where id = 1;
+  if i.planilha_url is null or i.planilha_url = '' then return new; end if;
+  perform net.http_post(
+    url := i.planilha_url,
+    body := jsonb_build_object('token', i.planilha_token, 'tipo', 'dentista') || to_jsonb(new),
+    headers := '{"Content-Type": "application/json"}'::jsonb,
+    timeout_milliseconds := 10000
+  );
+  return new;
+exception when others then
+  return new; -- nunca bloquear o cadastro por falha na planilha
+end $fn$;
+
+drop trigger if exists dentista_para_planilha on public.perfis;
+create trigger dentista_para_planilha after insert or update on public.perfis
+  for each row execute function public.enviar_dentista_planilha();
+
+-- Para reenviar todos os cadastros já existentes (rodar uma vez):
+--   select net.http_post(url := i.planilha_url,
+--     body := jsonb_build_object('token', i.planilha_token, 'tipo', 'dentista') || to_jsonb(p),
+--     headers := '{"Content-Type": "application/json"}'::jsonb)
+--   from public.perfis p, public.integracoes i where i.id = 1;

@@ -32,6 +32,17 @@ const COLUNAS_DENTISTAS = [
 ];
 
 function doPost(e) {
+  // uma mensagem por vez: evita linhas duplicadas e abas criadas em dobro
+  const trava = LockService.getScriptLock();
+  trava.waitLock(30000);
+  try {
+    return processar(e);
+  } finally {
+    trava.releaseLock();
+  }
+}
+
+function processar(e) {
   try {
     const d = JSON.parse(e.postData.contents || '{}');
     if (d.token !== TOKEN) return resposta({ ok: false, erro: 'token inválido' });
