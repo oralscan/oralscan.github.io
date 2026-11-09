@@ -11,6 +11,9 @@
  *
  * Cada compra ocupa UMA linha (identificada pelo ID da compra): quando o status
  * muda (pago, estornado, cancelado) a mesma linha é atualizada.
+ *
+ * Aba "Dentistas" (captação de leads): cada dentista que se cadastra no app ocupa
+ * uma linha, atualizada sempre que o cadastro muda (mensagens com tipo = "dentista").
  */
 const TOKEN = 'COLE_AQUI_O_TOKEN';
 const PLANILHA_ID = 'COLE_AQUI_O_ID_DA_PLANILHA'; // parte da URL entre /d/ e /edit
@@ -21,10 +24,18 @@ const COLUNAS = [
   'Forma', 'Atualizado em',
 ];
 
+const ABA_DENTISTAS = 'Dentistas';
+const COLUNAS_DENTISTAS = [
+  'ID', 'Cadastrado em', 'Nome', 'E-mail', 'WhatsApp', 'Abrir conversa', 'Telefone', 'CRO',
+  'CPF/CNPJ', 'Clínica', 'Endereço', 'Bairro', 'Cidade', 'CEP', 'Situação', 'Perfil',
+  'Aceite LGPD', 'Atualizado em',
+];
+
 function doPost(e) {
   try {
     const d = JSON.parse(e.postData.contents || '{}');
     if (d.token !== TOKEN) return resposta({ ok: false, erro: 'token inválido' });
+    if (d.tipo === 'dentista') return gravarDentista(d);
     const aba = obterAba();
     const linha = [
       d.compra_id, data(d.criado_em), data(d.pago_em), traduz(d.status), d.nome, d.email, d.whatsapp,
@@ -61,6 +72,37 @@ function obterAba() {
     aba.getRange('B:C').setNumberFormat('dd/mm/yyyy hh:mm');
     aba.getRange('P:P').setNumberFormat('dd/mm/yyyy hh:mm');
     aba.getRange('M:M').setNumberFormat('R$ #,##0.00');
+  }
+  return aba;
+}
+
+function gravarDentista(d) {
+  const aba = obterAbaDentistas();
+  const digitos = String(d.whatsapp || '').replace(/[^0-9]/g, '');
+  const wa = digitos ? '=HYPERLINK("https://wa.me/' + (digitos.length <= 11 ? '55' + digitos : digitos) + '","WhatsApp")' : '';
+  const linha = [
+    d.id, data(d.criado_em), d.nome || '', d.email || '', d.whatsapp || '', wa, d.telefone || '',
+    d.cro ? d.cro + '/' + (d.cro_uf || '') : '', d.cpf_cnpj || '', d.clinica || '', d.endereco || '',
+    d.bairro || '', d.cidade || '', d.cep || '', d.ativo === false ? 'Inativo' : 'Ativo',
+    d.papel === 'admin' ? 'Admin' : 'Dentista', data(d.consentimento_lgpd), new Date(),
+  ];
+  const ids = aba.getLastRow() > 1 ? aba.getRange(2, 1, aba.getLastRow() - 1, 1).getValues().flat() : [];
+  const i = ids.indexOf(d.id);
+  if (i >= 0) aba.getRange(i + 2, 1, 1, linha.length).setValues([linha]);
+  else aba.appendRow(linha);
+  return resposta({ ok: true });
+}
+
+function obterAbaDentistas() {
+  const ss = SpreadsheetApp.openById(PLANILHA_ID);
+  let aba = ss.getSheetByName(ABA_DENTISTAS);
+  if (!aba) aba = ss.insertSheet(ABA_DENTISTAS);
+  if (aba.getLastRow() === 0) {
+    aba.appendRow(COLUNAS_DENTISTAS);
+    aba.getRange(1, 1, 1, COLUNAS_DENTISTAS.length).setFontWeight('bold').setBackground('#b97f72').setFontColor('#ffffff');
+    aba.setFrozenRows(1);
+    aba.getRange('B:B').setNumberFormat('dd/mm/yyyy hh:mm');
+    aba.getRange('Q:R').setNumberFormat('dd/mm/yyyy hh:mm');
   }
   return aba;
 }
