@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { api } from '../../lib/api.js'
 import { Campo, Carregando, Modal, Selo, useAviso, useDados, Vazio } from '../../components/ui.jsx'
 import { hoje, moeda, dataYmdBR, dataHoraCurta } from '../../lib/tempo.js'
-import { MODALIDADE, precoAtual } from '../../lib/util.js'
+import { MODALIDADE, precoAtual, plural } from '../../lib/util.js'
 
 const NOVO = { nome: '', descricao: '', qtd_creditos: 5, preco: 0, preco_promocional: null, promocao_ate: null, validade_dias: 180, condicoes: '', modalidade: 'ambos', ativo: true }
 
@@ -47,7 +47,7 @@ export default function CombosAdmin() {
               <div className="cartao combo" key={c.id} style={c.ativo ? null : { opacity: .6 }}>
                 <div className="linha-entre"><h3 style={{ margin: 0 }}>{c.nome}</h3><Selo cor={c.ativo ? 'verde' : 'cinza'}>{c.ativo ? 'Ativo' : 'Desativado'}</Selo></div>
                 <div className="combo-preco">{atual < c.preco && <s>{moeda(c.preco)}</s>}{moeda(atual)}</div>
-                <div className="suave pequeno">{c.qtd_creditos} escaneamento(s) · validade {c.validade_dias} dias · {MODALIDADE[c.modalidade]}</div>
+                <div className="suave pequeno">{plural(c.qtd_creditos, 'escaneamento', 'escaneamentos')} · validade {c.validade_dias} dias · {MODALIDADE[c.modalidade]}</div>
                 {c.preco_promocional != null && <div className="pequeno"><Selo cor="amarelo">Promoção {moeda(c.preco_promocional)}{c.promocao_ate ? ` até ${dataYmdBR(c.promocao_ate)}` : ''}</Selo></div>}
                 {c.descricao && <div className="pequeno">{c.descricao}</div>}
                 <div className="linha mt">

@@ -2,13 +2,13 @@ import { useMemo, useRef, useState } from 'react'
 import { api } from '../../lib/api.js'
 import { Campo, Carregando, Kpi, Modal, Selo, useAviso, useDados, Vazio } from '../../components/ui.jsx'
 import { hoje, somaDias, dataCurta, dataHoraCurta, diaSemana, moeda, ymd } from '../../lib/tempo.js'
-import { STATUS_COMPRA } from '../../lib/util.js'
+import { STATUS_COMPRA, plural } from '../../lib/util.js'
 import { exportarExcel, exportarPdf } from '../../lib/exportar.js'
 import { ModalAvisoWhats } from '../../components/admin.jsx'
 
 function msgCompra(tipo, c) {
   const nome = c.dentista?.nome || ''
-  if (tipo === 'liberar') return `Olá, ${nome}! ✅ Recebemos seu pagamento de ${moeda(c.valor)} do ${c.combo_nome}. Seus ${c.qtd_creditos} crédito(s) já estão liberados no app Oral Scan — é só agendar. Obrigada!`
+  if (tipo === 'liberar') return `Olá, ${nome}! ✅ Recebemos seu pagamento de ${moeda(c.valor)} do ${c.combo_nome}. ${c.qtd_creditos === 1 ? 'Seu crédito já está liberado' : `Seus ${c.qtd_creditos} créditos já estão liberados`} no app Oral Scan — é só agendar. Obrigada!`
   if (tipo === 'nf') return `Olá, ${nome}! A nota fiscal da sua compra do ${c.combo_nome} já está disponível no app Oral Scan (Combos → Minhas compras → Baixar NF).`
   if (tipo === 'estornar') return `Olá, ${nome}. Registramos o estorno da sua compra do ${c.combo_nome} (${moeda(c.valor)}). Os créditos não utilizados foram cancelados. Qualquer dúvida, estamos à disposição. Oral Scan`
   if (tipo === 'cancelar') return `Olá, ${nome}. Sua compra pendente do ${c.combo_nome} foi cancelada. Se ainda quiser o combo, é só gerar um novo PIX pelo app. Oral Scan`
@@ -120,7 +120,7 @@ export default function Vendas() {
       </div>
 
       <div className="kpis">
-        <Kpi destaque rotulo="Valor recebido" valor={moeda(recebido)} detalhe={`${pagas.length} pagamento(s) confirmados`} />
+        <Kpi destaque rotulo="Valor recebido" valor={moeda(recebido)} detalhe={`${plural(pagas.length, 'pagamento confirmado', 'pagamentos confirmados')}`} />
         <Kpi rotulo="Faturamento bruto" valor={moeda(bruto)} detalhe="inclui vendas estornadas" />
         <Kpi rotulo="Combos vendidos" valor={pagas.length} />
         <Kpi rotulo="Ticket médio" valor={moeda(pagas.length ? recebido / pagas.length : 0)} />
@@ -153,7 +153,7 @@ export default function Vendas() {
                 <tr key={c.id}>
                   <td>{dataHoraCurta(c.criado_em)}</td>
                   <td>{c.dentista?.nome}<div className="suave pequeno">{c.dentista?.clinica}</div></td>
-                  <td>{c.combo_nome}<div className="suave pequeno">{c.qtd_creditos} crédito(s)</div></td>
+                  <td>{c.combo_nome}<div className="suave pequeno">{plural(c.qtd_creditos, 'crédito', 'créditos')}</div></td>
                   <td className="num">{moeda(c.valor)}</td>
                   <td><Selo cor={STATUS_COMPRA[c.status].cor}>{STATUS_COMPRA[c.status].rotulo}</Selo>{c.pago_em && <div className="suave pequeno">pago {dataHoraCurta(c.pago_em)}</div>}</td>
                   <td className="pequeno">{c.transacao_id || '—'}<div className="suave">{c.gateway}{c.nf_path ? ' · NF ✓' : ''}</div></td>
@@ -176,7 +176,7 @@ export default function Vendas() {
         {acao && (
           <div className="pilha">
             <p><strong>{acao.c.dentista?.nome}</strong> · {acao.c.combo_nome} · {moeda(acao.c.valor)}</p>
-            {acao.tipo === 'liberar' && <div className="alerta alerta-aviso">Confirme somente depois de ver o PIX no extrato. Os {acao.c.qtd_creditos} crédito(s) serão liberados na hora. (Com o Mercado Pago configurado isso acontece sozinho.)</div>}
+            {acao.tipo === 'liberar' && <div className="alerta alerta-aviso">Confirme somente depois de ver o PIX no extrato. {acao.c.qtd_creditos === 1 ? 'O crédito será liberado' : `Os ${acao.c.qtd_creditos} créditos serão liberados`} na hora. (Com o Mercado Pago configurado isso acontece sozinho.)</div>}
             {acao.tipo === 'estornar' && <div className="alerta alerta-aviso">Registra o estorno e cancela os créditos ainda não usados. A devolução do dinheiro deve ser feita no banco/Mercado Pago.</div>}
             {acao.tipo === 'cancelar' && <p>Cancelar esta compra pendente?</p>}
             {acao.tipo === 'nf' ? (

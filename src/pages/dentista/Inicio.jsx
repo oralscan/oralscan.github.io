@@ -3,7 +3,7 @@ import { api } from '../../lib/api.js'
 import { useSessao } from '../../App.jsx'
 import { Carregando, Selo, useDados, Vazio } from '../../components/ui.jsx'
 import { hoje, hm, diaMes, dataLonga, dataYmdBR } from '../../lib/tempo.js'
-import { resumoCreditos, MODALIDADE, STATUS_COMPRA } from '../../lib/util.js'
+import { resumoCreditos, MODALIDADE, STATUS_COMPRA, plural } from '../../lib/util.js'
 
 export default function Inicio() {
   const { perfil } = useSessao()
@@ -31,7 +31,7 @@ export default function Inicio() {
             <div className="suave pequeno">Créditos disponíveis</div>
             <div className="numero-grande">{r.disponiveis}</div>
             {r.proxVencimento && <div className="suave pequeno mt">Próximo vencimento: {dataYmdBR(r.proxVencimento)}</div>}
-            {r.vencidos > 0 && <div className="suave pequeno">{r.vencidos} crédito(s) vencido(s)</div>}
+            {r.vencidos > 0 && <div className="suave pequeno">{plural(r.vencidos, 'crédito vencido', 'créditos vencidos')}</div>}
           </div>
           <div className="pilha" style={{ gap: 8 }}>
             {r.disponiveis > 0
@@ -44,7 +44,7 @@ export default function Inicio() {
 
       {pendentes.length > 0 && (
         <div className="alerta alerta-aviso">
-          Você tem {pendentes.length} compra(s) aguardando pagamento.{' '}
+          Você tem {plural(pendentes.length, 'compra', 'compras')} aguardando pagamento.{' '}
           <Link to={`/compra/${pendentes[0].id}`}><strong>Ver PIX</strong></Link>
         </div>
       )}

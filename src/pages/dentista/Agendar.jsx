@@ -5,7 +5,7 @@ import { useSessao } from '../../App.jsx'
 import { Campo, Carregando, useAviso, useDados, Vazio } from '../../components/ui.jsx'
 import { horariosLivres } from '../../lib/agenda.js'
 import { hoje, somaDias, dataHora, diaSemana, DIAS_CURTOS, hm, dataLonga, addMin } from '../../lib/tempo.js'
-import { resumoCreditos, MODALIDADE, linkWhats } from '../../lib/util.js'
+import { resumoCreditos, MODALIDADE, linkWhats, plural } from '../../lib/util.js'
 
 const DIAS_A_FRENTE = 45
 
@@ -92,7 +92,7 @@ export default function Agendar() {
     <div className="pilha">
       <div className="linha-entre">
         <h1 style={{ margin: 0 }}>Agendar escaneamento</h1>
-        <span className="suave pequeno">{r.disponiveis} crédito(s)</span>
+        <span className="suave pequeno">{plural(r.disponiveis, 'crédito disponível', 'créditos disponíveis')}</span>
       </div>
       <div className="passos">{[1, 2, 3, 4, 5].map((n) => <div key={n} className={`passo ${n <= passo ? 'feito' : ''}`} />)}</div>
 

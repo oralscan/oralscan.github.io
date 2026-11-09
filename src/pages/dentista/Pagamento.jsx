@@ -5,7 +5,7 @@ import { api } from '../../lib/api.js'
 import { useSessao } from '../../App.jsx'
 import { Carregando, Selo, useAviso } from '../../components/ui.jsx'
 import { moeda } from '../../lib/tempo.js'
-import { linkWhats, STATUS_COMPRA } from '../../lib/util.js'
+import { linkWhats, STATUS_COMPRA, plural } from '../../lib/util.js'
 import { pixEstatico } from '../../lib/pix.js'
 
 export default function Pagamento() {
@@ -67,7 +67,7 @@ export default function Pagamento() {
       <div className="cartao centro pilha" style={{ alignItems: 'center' }}>
         <div style={{ fontSize: 48 }}>🎉</div>
         <h1>Pagamento confirmado</h1>
-        <p className="suave">{compra.qtd_creditos} crédito(s) do <strong>{compra.combo_nome}</strong> já estão na sua conta.</p>
+        <p className="suave">{plural(compra.qtd_creditos, 'crédito', 'créditos')} do <strong>{compra.combo_nome}</strong> {compra.qtd_creditos === 1 ? 'já está' : 'já estão'} na sua conta.</p>
         <Link className="btn btn-primario" to="/agendar">Agendar agora</Link>
       </div>
     )

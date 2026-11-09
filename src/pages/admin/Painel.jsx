@@ -5,7 +5,7 @@ import { Carregando, Kpi, Selo, useDados, Vazio } from '../../components/ui.jsx'
 import { DetalheAgendamento } from '../../components/admin.jsx'
 import { hoje, somaDias, dataHora, hm, diaMes, moeda, dataLonga, addMin } from '../../lib/tempo.js'
 import { horariosLivres } from '../../lib/agenda.js'
-import { MODALIDADE, resumoCreditos } from '../../lib/util.js'
+import { MODALIDADE, resumoCreditos, plural } from '../../lib/util.js'
 
 export default function Painel() {
   const [aberto, setAberto] = useState(null)
@@ -55,18 +55,18 @@ export default function Painel() {
       </div>
 
       <div className="kpis">
-        <Kpi destaque rotulo="Faturamento do mês" valor={moeda(faturamentoMes)} detalhe={`${pagosMes.length} venda(s) pagas`} />
+        <Kpi destaque rotulo="Faturamento do mês" valor={moeda(faturamentoMes)} detalhe={`${plural(pagosMes.length, 'venda paga', 'vendas pagas')}`} />
         <Kpi rotulo="Total de vendas" valor={totalVendas} detalhe="combos pagos" />
         <Kpi rotulo="Escaneamentos agendados" valor={proximos.length} detalhe="a realizar" />
         <Kpi rotulo="Créditos vendidos" valor={cr.total} detalhe={`${cr.usados} utilizados · ${cr.disponiveis} em aberto`} />
         <Kpi rotulo="Pagamentos pendentes" valor={pendentes.length} detalhe={moeda(pendentes.reduce((s, c) => s + Number(c.valor), 0))} />
         <Kpi rotulo="Horários livres (7 dias)" valor={livres} detalhe={curto ? `encaixes de ${curto.duracao_min} min na sede` : ''} />
-        <Kpi rotulo="Horas bloqueadas (7 dias)" valor={horasBloq.toFixed(1).replace('.', ',') + ' h'} detalhe={`${bloqFuturos.length} bloqueio(s) futuros`} />
+        <Kpi rotulo="Horas bloqueadas (7 dias)" valor={horasBloq.toFixed(1).replace('.', ',') + ' h'} detalhe={`${plural(bloqFuturos.length, 'bloqueio futuro', 'bloqueios futuros')}`} />
       </div>
 
       {pedidos.length > 0 && (
         <div className="alerta alerta-aviso">
-          <strong>{pedidos.length} pedido(s) de alteração</strong> aguardando você:{' '}
+          <strong>{plural(pedidos.length, 'pedido', 'pedidos')} de alteração</strong> aguardando você:{' '}
           {pedidos.map((a) => <button key={a.id} className="btn-link" onClick={() => setAberto(a)}>{a.paciente_nome} ({diaMes(a.inicio)})</button>)}
         </div>
       )}

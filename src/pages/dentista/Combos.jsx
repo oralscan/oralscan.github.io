@@ -4,7 +4,7 @@ import { api } from '../../lib/api.js'
 import { Carregando, Modal, Selo, useAviso, useDados, Vazio } from '../../components/ui.jsx'
 import { hoje, dataCurta, dataYmdBR } from '../../lib/tempo.js'
 import { moeda } from '../../lib/tempo.js'
-import { MODALIDADE, precoAtual, STATUS_COMPRA } from '../../lib/util.js'
+import { MODALIDADE, precoAtual, STATUS_COMPRA, plural } from '../../lib/util.js'
 import { BotaoNota } from './Inicio.jsx'
 
 export default function Combos() {
@@ -43,7 +43,7 @@ export default function Combos() {
                 {promo && <span className="combo-fita"><Selo cor="amarelo">Promoção</Selo></span>}
                 <h3>{c.nome}</h3>
                 <div className="combo-preco">{promo && <s>{moeda(c.preco)}</s>}{moeda(preco)}</div>
-                <div className="suave pequeno">{c.qtd_creditos} escaneamento(s) · {moeda(preco / c.qtd_creditos)} cada</div>
+                <div className="suave pequeno">{plural(c.qtd_creditos, 'escaneamento', 'escaneamentos')} · {moeda(preco / c.qtd_creditos)} cada</div>
                 {c.descricao && <p style={{ margin: 0 }}>{c.descricao}</p>}
                 <ul className="pequeno suave" style={{ margin: 0, paddingLeft: 18 }}>
                   <li>Validade: {c.validade_dias} dias após o pagamento</li>
@@ -68,7 +68,7 @@ export default function Combos() {
                 {dados.compras.map((c) => (
                   <tr key={c.id}>
                     <td>{dataCurta(c.criado_em)}</td>
-                    <td>{c.combo_nome}<div className="suave pequeno">{c.qtd_creditos} crédito(s)</div></td>
+                    <td>{c.combo_nome}<div className="suave pequeno">{plural(c.qtd_creditos, 'crédito', 'créditos')}</div></td>
                     <td className="num">{moeda(c.valor)}</td>
                     <td><Selo cor={STATUS_COMPRA[c.status].cor}>{STATUS_COMPRA[c.status].rotulo}</Selo></td>
                     <td className="num">

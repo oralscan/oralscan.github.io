@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { api } from '../../lib/api.js'
 import { Campo, Carregando, Modal, useAviso, useDados, Vazio } from '../../components/ui.jsx'
 import { hoje, somaDias, dataHora, dataHoraCurta, dataCurta, hm, ymd } from '../../lib/tempo.js'
+import { plural } from '../../lib/util.js'
 
 const MOTIVOS = ['Férias', 'Curso', 'Compromisso pessoal', 'Manutenção do scanner', 'Feriado']
 
@@ -103,7 +104,7 @@ export default function Bloqueios() {
       <Modal titulo="Atenção: há agendamentos neste período" aberto={!!conflitos} fechar={() => setConflitos(null)}>
         {conflitos && (
           <div className="pilha">
-            <div className="alerta alerta-aviso">O bloqueio afeta {conflitos.afetados.length} agendamento(s). Eles NÃO serão cancelados automaticamente — remarque ou cancele cada um e avise o dentista.</div>
+            <div className="alerta alerta-aviso">O bloqueio afeta {plural(conflitos.afetados.length, 'agendamento', 'agendamentos')}. Eles NÃO serão cancelados automaticamente — remarque ou cancele cada um e avise o dentista.</div>
             <ul style={{ margin: 0, paddingLeft: 18 }}>
               {conflitos.afetados.map((a) => <li key={a.id}>{dataHoraCurta(a.inicio)} · {a.paciente_nome} ({a.dentista?.nome})</li>)}
             </ul>

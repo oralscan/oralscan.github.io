@@ -12,6 +12,8 @@ export const STATUS_COMPRA = {
 }
 export const MODALIDADE = { sede: 'Na sede', externo: 'Na clínica do dentista', ambos: 'Sede ou externo' }
 
+export const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`
+
 export const soDigitos = (s) => String(s || '').replace(/\D/g, '')
 
 export function linkWhats(numero, texto) {
