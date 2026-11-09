@@ -140,10 +140,7 @@
 .vt-foto { position: relative; margin: 0 auto; width: min(320px, 78vw); }
 .vt-foto::before { content: ""; position: absolute; inset: 18px -18px -18px 18px; border-radius: 999px 999px 32px 32px; border: 1.5px solid rgba(185, 127, 114, .45); }
 .vt-foto picture, .vt-foto img { display: block; width: 100%; }
-.vt-foto img { position: relative; height: auto; aspect-ratio: 4 / 5; object-fit: cover; object-position: 50% 12%; border-radius: 999px 999px 32px 32px; background: #efe4dc; box-shadow: 0 34px 70px -28px rgba(74, 52, 42, .5); }
-.vt-foto-selo { position: absolute; left: -14px; bottom: 34px; display: flex; flex-direction: column; background: rgba(255, 255, 255, .95); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid var(--borda); border-left: 3px solid var(--rose); border-radius: 14px; padding: 10px 14px; box-shadow: 0 18px 40px -14px rgba(74, 52, 42, .35); }
-.vt-foto-selo b { font-family: var(--serifa); font-size: 1.02rem; }
-.vt-foto-selo span { font-size: .8rem; color: var(--suave); }
+.vt-foto img { position: relative; height: auto; aspect-ratio: 4 / 5; object-fit: cover; object-position: 50% 20%; border-radius: 999px 999px 32px 32px; background: #efe4dc; box-shadow: 0 34px 70px -28px rgba(74, 52, 42, .5); }
 .vt-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
 .vt-chips span { background: #fff; border: 1px solid var(--borda); border-radius: 999px; padding: 7px 14px; font-size: .85rem; font-weight: 500; color: #5c514c; }
 @media (min-width: 860px) { .vt-sobre-grade { grid-template-columns: 360px 1fr; gap: 72px; } }

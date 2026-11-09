@@ -81,7 +81,7 @@ export default function Vitrine() {
               <a href="#como-funciona" className="btn vt-btn-grande" onClick={rolarPara('como-funciona')}>Ver como funciona</a>
             </div>
             <div className="vt-assina">
-              <img src="./dra-tamires-avatar.webp" alt="Dra. Tamires Bueno" width="52" height="52" />
+              <img src="./dra-tamires-rosto.webp" alt="Dra. Tamires Bueno" width="52" height="52" />
               <span>Atendimento feito pessoalmente pela<b>Dra. Tamires De Luccas Bueno</b></span>
             </div>
             <ul className="vt-credenciais">
@@ -192,10 +192,9 @@ export default function Vitrine() {
         <div className="vt-largura vt-sobre-grade">
           <figure className="vt-foto">
             <picture>
-              <source srcSet="./dra-tamires.webp" type="image/webp" />
-              <img src="./dra-tamires.jpg" alt="Dra. Tamires De Luccas Bueno, cirurgiã-dentista" width="720" height="1082" loading="lazy" decoding="async" />
+              <source srcSet="./dra-tamires-consultorio.webp" type="image/webp" />
+              <img src="./dra-tamires-consultorio.jpg" alt="Dra. Tamires De Luccas Bueno, cirurgiã-dentista" width="720" height="900" loading="lazy" decoding="async" />
             </picture>
-            <figcaption className="vt-foto-selo"><b>Prof.ª Dr.ª</b><span>CRO-SP 98.138</span></figcaption>
           </figure>
           <div>
             <span className="vt-sobre">Quem atende</span>
