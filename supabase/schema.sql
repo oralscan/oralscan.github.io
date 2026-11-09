@@ -548,3 +548,46 @@ create policy notas_admin on storage.objects for all
 -- execute a linha abaixo trocando o e-mail, para virar administradora:
 --   update public.perfis set papel = 'admin' where email = 'email@da-clinica.com';
 -- =====================================================================
+
+-- =====================================================================
+-- INTEGRAÇÃO: vendas -> planilha Google (Apps Script em planilha/vendas-webhook.gs)
+-- Depois de publicar o Apps Script, grave URL e token:
+--   update public.integracoes set planilha_url = 'https://script.google.com/macros/s/.../exec',
+--                                  planilha_token = 'MESMO_TOKEN_DO_SCRIPT' where id = 1;
+-- =====================================================================
+create extension if not exists pg_net with schema extensions;
+
+create table if not exists public.integracoes (
+  id int primary key default 1 check (id = 1),
+  planilha_url text,
+  planilha_token text
+);
+alter table public.integracoes enable row level security; -- sem políticas: só o banco lê
+insert into public.integracoes (id) values (1) on conflict do nothing;
+
+create or replace function public.enviar_venda_planilha() returns trigger
+language plpgsql security definer set search_path = public, extensions as $fn$
+declare i integracoes%rowtype; p perfis%rowtype;
+begin
+  select * into i from integracoes where id = 1;
+  if i.planilha_url is null or i.planilha_url = '' then return new; end if;
+  select * into p from perfis where id = new.dentista_id;
+  perform net.http_post(
+    url := i.planilha_url,
+    body := jsonb_build_object(
+      'token', i.planilha_token, 'compra_id', new.id, 'criado_em', new.criado_em, 'pago_em', new.pago_em,
+      'status', new.status, 'nome', p.nome, 'email', p.email, 'whatsapp', p.whatsapp, 'cro', p.cro || '/' || p.cro_uf,
+      'clinica', p.clinica, 'cpf_cnpj', p.cpf_cnpj, 'combo', new.combo_nome, 'creditos', new.qtd_creditos,
+      'valor', new.valor, 'transacao_id', new.transacao_id, 'gateway', new.gateway),
+    headers := '{"Content-Type": "application/json"}'::jsonb,
+    timeout_milliseconds := 10000
+  );
+  return new;
+exception when others then
+  return new; -- nunca bloquear a venda por falha na planilha
+end $fn$;
+
+drop trigger if exists venda_para_planilha on public.compras;
+create trigger venda_para_planilha after update of status on public.compras
+  for each row when (new.status is distinct from old.status and new.status in ('pago','estornado','cancelado'))
+  execute function public.enviar_venda_planilha();
