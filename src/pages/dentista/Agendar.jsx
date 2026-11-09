@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../../lib/api.js'
 import { useSessao } from '../../App.jsx'
-import { Campo, Carregando, useAviso, useDados, Vazio } from '../../components/ui.jsx'
+import { Campo, Carregando, Modal, useAviso, useDados, Vazio } from '../../components/ui.jsx'
+import TutorialVideo from '../../components/Tutorial.jsx'
 import { horariosLivres } from '../../lib/agenda.js'
 import { hoje, somaDias, dataHora, diaSemana, DIAS_CURTOS, hm, dataLonga, addMin } from '../../lib/tempo.js'
 import { resumoCreditos, MODALIDADE, linkWhats, plural } from '../../lib/util.js'
@@ -62,14 +63,18 @@ export default function Agendar() {
 
   if (feito) return <Sucesso ag={feito} config={dados.config} perfil={perfil} />
 
+  const tutorial = { antecedencia: dados.config.antecedencia_horas, cancelamento: dados.config.cancelamento_horas }
+
   if (r.disponiveis === 0) {
     return (
+      <ComTutorial {...tutorial}>
       <div className="cartao">
         <Vazio titulo="Você ainda não tem créditos disponíveis">
           <p>Para agendar, adquira um combo de escaneamentos. O crédito é liberado assim que o PIX é confirmado.</p>
           <Link className="btn btn-primario" to="/combos">Ver combos</Link>
         </Vazio>
       </div>
+      </ComTutorial>
     )
   }
 
@@ -89,6 +94,7 @@ export default function Agendar() {
   }
 
   return (
+    <ComTutorial {...tutorial} passoAtual={passo}>
     <div className="pilha">
       <div className="linha-entre">
         <h1 style={{ margin: 0 }}>Agendar escaneamento</h1>
@@ -232,6 +238,34 @@ export default function Agendar() {
         </div>
       )}
       <button className="btn-link" onClick={() => nav('/')}>Cancelar</button>
+    </div>
+    </ComTutorial>
+  )
+}
+
+// vídeo tutorial à esquerda (computador) ou em janela (celular)
+function ComTutorial({ children, passoAtual, antecedencia, cancelamento }) {
+  const [aberto, setAberto] = useState(false)
+  const [ampliado, setAmpliado] = useState(null) // segundo do vídeo ao ampliar
+  const larga = typeof window !== 'undefined' && window.matchMedia('(min-width: 980px)').matches
+  return (
+    <div className="agendar-grade">
+      <aside className="agendar-video" aria-label="Tutorial em vídeo">
+        {larga && <TutorialVideo antecedencia={antecedencia} cancelamento={cancelamento} passoAtual={passoAtual} onAmpliar={setAmpliado} />}
+      </aside>
+      <div className="pilha">
+        <button type="button" className="agendar-video-btn" onClick={() => setAberto(true)}>
+          <span className="ic"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M8 5v14l11-7z" fill="currentColor" /></svg></span>
+          <span><b>Ver tutorial em vídeo</b><small>Como comprar créditos, agendar e acompanhar · cerca de 1 minuto</small></span>
+        </button>
+        {children}
+      </div>
+      <Modal titulo="Como usar o Oral Scan" aberto={aberto} fechar={() => setAberto(false)} largura={440}>
+        {aberto && <TutorialVideo antecedencia={antecedencia} cancelamento={cancelamento} passoAtual={passoAtual} compacto />}
+      </Modal>
+      <Modal titulo="Como usar o Oral Scan" aberto={ampliado !== null} fechar={() => setAmpliado(null)} largura={1040}>
+        {ampliado !== null && <TutorialVideo antecedencia={antecedencia} cancelamento={cancelamento} passoAtual={passoAtual} grande inicioEm={ampliado} />}
+      </Modal>
     </div>
   )
 }
