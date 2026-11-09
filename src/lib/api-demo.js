@@ -2,7 +2,7 @@
 import { dataHora, hoje, somaDias, ymd, hm, diaSemana, minutos, addMin } from './tempo.js'
 import { folgas } from './agenda.js'
 
-const CHAVE = 'oralscan-demo-v2'
+const CHAVE = 'oralscan-demo-v3'
 const uid = () => (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2))
 const espera = (v) => new Promise((r) => setTimeout(() => r(structuredClone(v)), 120))
 
@@ -43,7 +43,7 @@ function semente() {
     ],
     perfis: [
       perfil(admin, { papel: 'admin', nome: 'Dra. Tamires Bueno', email: 'admin@demo.com', whatsapp: '14988203130' }),
-      perfil(dent, { nome: 'Dr. Rafael Moreira', cro: '12345', cro_uf: 'SP', cpf_cnpj: '123.456.789-00', clinica: 'Sorriso Prime', telefone: '1133334444', whatsapp: '11988887777', email: 'dentista@demo.com', endereco: 'Rua das Flores, 120', bairro: 'Centro', cidade: 'São Paulo', cep: '01000-000' }),
+      perfil(dent, { nome: 'Dr. Rafael Moreira', cro: '12345', cro_uf: 'SP', cpf_cnpj: '123.456.789-00', clinica: 'Sorriso Prime', telefone: '1133334444', whatsapp: '14988203130', email: 'dentista@demo.com', endereco: 'Rua das Flores, 120', bairro: 'Centro', cidade: 'São Paulo', cep: '01000-000' }),
       perfil(dent2, { nome: 'Dra. Carla Nunes', cro: '54321', cro_uf: 'SP', clinica: 'OdontoVida', whatsapp: '11977776666', email: 'carla@demo.com', endereco: 'Av. Paulista, 900', cidade: 'São Paulo' }),
     ],
     config: { id: 1, antecedencia_horas: 48, passo_min: 30, intervalo_min: 15, intervalo_externo_min: 60, cancelamento_horas: 24, horarios: HORARIOS, endereco_sede: 'Rua Exemplo, 100 – Sala 12', whatsapp_clinica: '14988203130', chave_pix: 'pix@oralscan.com.br', politica_privacidade: '' },

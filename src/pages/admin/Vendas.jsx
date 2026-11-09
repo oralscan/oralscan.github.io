@@ -4,6 +4,16 @@ import { Campo, Carregando, Kpi, Modal, Selo, useAviso, useDados, Vazio } from '
 import { hoje, somaDias, dataCurta, dataHoraCurta, diaSemana, moeda, ymd } from '../../lib/tempo.js'
 import { STATUS_COMPRA } from '../../lib/util.js'
 import { exportarExcel, exportarPdf } from '../../lib/exportar.js'
+import { ModalAvisoWhats } from '../../components/admin.jsx'
+
+function msgCompra(tipo, c) {
+  const nome = c.dentista?.nome || ''
+  if (tipo === 'liberar') return `Olá, ${nome}! ✅ Recebemos seu pagamento de ${moeda(c.valor)} do ${c.combo_nome}. Seus ${c.qtd_creditos} crédito(s) já estão liberados no app Oral Scan — é só agendar. Obrigada!`
+  if (tipo === 'nf') return `Olá, ${nome}! A nota fiscal da sua compra do ${c.combo_nome} já está disponível no app Oral Scan (Combos → Minhas compras → Baixar NF).`
+  if (tipo === 'estornar') return `Olá, ${nome}. Registramos o estorno da sua compra do ${c.combo_nome} (${moeda(c.valor)}). Os créditos não utilizados foram cancelados. Qualquer dúvida, estamos à disposição. Oral Scan`
+  if (tipo === 'cancelar') return `Olá, ${nome}. Sua compra pendente do ${c.combo_nome} foi cancelada. Se ainda quiser o combo, é só gerar um novo PIX pelo app. Oral Scan`
+  return ''
+}
 
 function periodoRapido(p) {
   const hj = hoje()
@@ -22,6 +32,8 @@ export default function Vendas() {
   const [cliente, setCliente] = useState('')
   const [status, setStatus] = useState('')
   const [acao, setAcao] = useState(null)
+  const [aviso, setAviso] = useState(null)
+  const oferecerAviso = (tipo, c, titulo) => setAviso({ numero: c.dentista?.whatsapp || c.dentista?.telefone, titulo, texto: msgCompra(tipo, c) })
   const arquivo = useRef(null)
   const { dados, carregando, recarregar } = useDados(async () => {
     const [compras, combos] = await Promise.all([api.compras(), api.combos()])
@@ -56,14 +68,14 @@ export default function Vendas() {
       if (tipo === 'liberar') await api.liberarCompra(c.id)
       if (tipo === 'estornar') await api.estornarCompra(c.id)
       if (tipo === 'cancelar') await api.cancelarCompra(c.id)
-      avisar({ liberar: 'Pagamento confirmado e créditos liberados.', estornar: 'Estorno registrado; créditos não usados foram cancelados.', cancelar: 'Compra cancelada.' }[tipo])
-      setAcao(null); recarregar()
+      const titulo = { liberar: 'Pagamento confirmado e créditos liberados.', estornar: 'Estorno registrado; créditos não usados foram cancelados.', cancelar: 'Compra cancelada.' }[tipo]
+      avisar(titulo); setAcao(null); recarregar(); oferecerAviso(tipo, c, titulo)
     } catch (er) { avisar(er.message, 'erro') }
   }
   async function anexar(e) {
     const f = e.target.files?.[0]
     if (!f || !acao) return
-    try { await api.anexarNota(acao.c, f); avisar('Nota fiscal anexada. O dentista já pode baixar.'); setAcao(null); recarregar() } catch (er) { avisar(er.message, 'erro') }
+    try { await api.anexarNota(acao.c, f); avisar('Nota fiscal anexada. O dentista já pode baixar.'); oferecerAviso('nf', acao.c, 'Nota fiscal anexada.'); setAcao(null); recarregar() } catch (er) { avisar(er.message, 'erro') }
     e.target.value = ''
   }
 
@@ -181,6 +193,7 @@ export default function Vendas() {
           </div>
         )}
       </Modal>
+      <ModalAvisoWhats aviso={aviso} fechar={() => setAviso(null)} />
     </div>
   )
 }

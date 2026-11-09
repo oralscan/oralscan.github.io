@@ -13,7 +13,41 @@ export function mensagensWhats(a, config) {
     lembrete: `Olá, ${nome}! ⏰ Lembrete do escaneamento de ${a.paciente_nome}: ${quando}, ${local}. Qualquer imprevisto, avise por aqui. Oral Scan`,
     cancelamento: `Olá, ${nome}. O escaneamento de ${a.paciente_nome} de ${quando} foi cancelado. Se quiser remarcar, é só agendar pelo app. Oral Scan`,
     alteracao: `Olá, ${nome}! O escaneamento de ${a.paciente_nome} foi alterado para ${quando}, ${local}. Oral Scan`,
+    concluido: `Olá, ${nome}! ✅ O escaneamento de ${a.paciente_nome} (${a.servico_nome}) foi realizado. Obrigada pela confiança! Oral Scan`,
+    falta: `Olá, ${nome}. Registramos ausência no escaneamento de ${a.paciente_nome} marcado para ${quando}. Para remarcar, é só agendar pelo app. Oral Scan`,
   }
+}
+
+// Depois de uma alteração: mostra a mensagem pronta (editável) e abre o WhatsApp do dentista
+export function AvisoWhats({ numero, titulo, texto: inicial, fechar }) {
+  const [texto, setTexto] = useState(inicial)
+  return (
+    <div className="pilha">
+      <div className="alerta alerta-ok"><strong>{titulo}</strong> Avise o dentista pelo WhatsApp:</div>
+      {numero ? (
+        <>
+          <textarea rows={7} value={texto} onChange={(e) => setTexto(e.target.value)} aria-label="Mensagem" />
+          <div className="linha" style={{ justifyContent: 'flex-end' }}>
+            <button className="btn" onClick={fechar}>Agora não</button>
+            <a className="btn btn-whats" href={linkWhats(numero, texto)} target="_blank" rel="noopener" onClick={() => setTimeout(fechar, 300)}>Enviar no WhatsApp</a>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="alerta alerta-aviso">Este dentista não tem WhatsApp cadastrado. Complete o cadastro em Dentistas.</div>
+          <div className="linha" style={{ justifyContent: 'flex-end' }}><button className="btn" onClick={fechar}>Fechar</button></div>
+        </>
+      )}
+    </div>
+  )
+}
+
+export function ModalAvisoWhats({ aviso, fechar }) {
+  return (
+    <Modal titulo="Avisar dentista" aberto={!!aviso} fechar={fechar}>
+      {aviso && <AvisoWhats {...aviso} fechar={fechar} />}
+    </Modal>
+  )
 }
 
 export function DetalheAgendamento(props) {
@@ -27,13 +61,35 @@ function DetalheInterno({ ag, config, fechar, aoMudar }) {
   const [hora, setHora] = useState(ag ? hm(ag.inicio) : '')
   const [motivo, setMotivo] = useState('')
   const [devolver, setDevolver] = useState(true)
+  const [depois, setDepois] = useState(null) // { titulo, texto } – aviso ao dentista após alterar
   if (!ag) return null
   const msgs = mensagensWhats(ag, config)
   const whats = ag.dentista?.whatsapp || ag.dentista?.telefone
 
-  const acao = async (fn, ok) => {
-    try { const r = await fn(); avisar(typeof r === 'string' ? r : ok); aoMudar?.(); fechar() } catch (e) { avisar(e.message, 'erro') }
+  // executa a alteração e, se houver mensagem, já oferece avisar o dentista
+  const acao = async (fn, ok, mensagem) => {
+    try {
+      const r = await fn()
+      const texto = typeof r === 'string' ? r : ok
+      avisar(texto); aoMudar?.()
+      if (mensagem) setDepois({ titulo: texto, texto: mensagem })
+      else fechar()
+    } catch (e) { avisar(e.message, 'erro') }
   }
+
+  if (depois) {
+    return (
+      <Modal titulo="Avisar dentista" aberto fechar={fechar} largura={600}>
+        <AvisoWhats numero={whats} titulo={depois.titulo} texto={depois.texto} fechar={fechar} />
+      </Modal>
+    )
+  }
+
+  const quandoAntes = `${dataLonga(ag.inicio)} às ${hm(ag.inicio)}`
+  const msgRemarcar = () =>
+    mensagensWhats({ ...ag, inicio: dataHora(dia, hora) }, config).alteracao.replace('foi alterado para', `foi remarcado de ${quandoAntes} para`)
+  const msgCancelar = () =>
+    msgs.cancelamento + (motivo.trim() ? `\nMotivo: ${motivo.trim()}` : '') + (devolver ? '\nO crédito já voltou para o seu saldo no app.' : '')
 
   return (
     <Modal titulo="Agendamento" aberto={!!ag} fechar={fechar} largura={600}>
@@ -70,8 +126,8 @@ function DetalheInterno({ ag, config, fechar, aoMudar }) {
 
         {ag.status !== 'cancelado' && !modo && (
           <div className="linha" style={{ borderTop: '1px solid var(--borda)', paddingTop: 14 }}>
-            {ag.status !== 'concluido' && <button className="btn btn-pequeno" onClick={() => acao(() => api.mudarStatus(ag.id, 'concluido'), 'Marcado como concluído.')}>✓ Concluído</button>}
-            {ag.status !== 'falta' && <button className="btn btn-pequeno" onClick={() => acao(() => api.mudarStatus(ag.id, 'falta'), 'Falta registrada.')}>Registrar falta</button>}
+            {ag.status !== 'concluido' && <button className="btn btn-pequeno" onClick={() => acao(() => api.mudarStatus(ag.id, 'concluido'), 'Marcado como concluído.', msgs.concluido)}>✓ Concluído</button>}
+            {ag.status !== 'falta' && <button className="btn btn-pequeno" onClick={() => acao(() => api.mudarStatus(ag.id, 'falta'), 'Falta registrada.', msgs.falta)}>Registrar falta</button>}
             {ag.status !== 'agendado' && <button className="btn btn-pequeno" onClick={() => acao(() => api.mudarStatus(ag.id, 'agendado'), 'Voltou para agendado.')}>Voltar p/ agendado</button>}
             {ag.status === 'agendado' && <button className="btn btn-pequeno" onClick={() => setModo('remarcar')}>Remarcar</button>}
             {ag.status === 'agendado' && <button className="btn btn-pequeno btn-perigo" onClick={() => setModo('cancelar')}>Cancelar</button>}
@@ -87,7 +143,7 @@ function DetalheInterno({ ag, config, fechar, aoMudar }) {
             <p className="suave pequeno">Como administradora, você pode remarcar fora das regras de antecedência. O sistema só impede choque com outro atendimento.</p>
             <div className="linha">
               <button className="btn" onClick={() => setModo(null)}>Voltar</button>
-              <button className="btn btn-primario" onClick={() => acao(() => api.remarcar(ag.id, dataHora(dia, hora)), 'Agendamento remarcado. Avise o dentista pelo WhatsApp.')}>Salvar novo horário</button>
+              <button className="btn btn-primario" onClick={() => acao(() => api.remarcar(ag.id, dataHora(dia, hora)), 'Agendamento remarcado.', msgRemarcar())}>Salvar novo horário</button>
             </div>
           </div>
         )}
@@ -97,7 +153,7 @@ function DetalheInterno({ ag, config, fechar, aoMudar }) {
             <label className="check"><input type="checkbox" checked={devolver} onChange={(e) => setDevolver(e.target.checked)} /> Devolver o crédito ao dentista</label>
             <div className="linha">
               <button className="btn" onClick={() => setModo(null)}>Voltar</button>
-              <button className="btn btn-perigo" onClick={() => acao(() => api.cancelar(ag.id, motivo, devolver), 'Cancelado.')}>Confirmar cancelamento</button>
+              <button className="btn btn-perigo" onClick={() => acao(() => api.cancelar(ag.id, motivo, devolver), 'Cancelado.', msgCancelar())}>Confirmar cancelamento</button>
             </div>
           </div>
         )}

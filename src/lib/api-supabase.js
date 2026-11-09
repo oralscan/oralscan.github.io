@@ -124,7 +124,7 @@ export function criarApiSupabase(url, chave) {
       return { precisaConfirmar: !r.data.session }
     },
     async compras() {
-      return ok(await sb.from('compras').select('*, dentista:perfis(nome, clinica, email)').order('criado_em', { ascending: false }))
+      return ok(await sb.from('compras').select('*, dentista:perfis(nome, clinica, email, whatsapp, telefone)').order('criado_em', { ascending: false }))
     },
     async creditos() { return ok(await sb.from('creditos').select('*')) },
     async bloqueios() { return ok(await sb.from('bloqueios').select('*').order('inicio')) },

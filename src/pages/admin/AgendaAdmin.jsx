@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../../lib/api.js'
 import { Campo, Carregando, Modal, useAviso, useDados } from '../../components/ui.jsx'
-import { DetalheAgendamento } from '../../components/admin.jsx'
+import { DetalheAgendamento, AvisoWhats, mensagensWhats } from '../../components/admin.jsx'
 import { hoje, somaDias, dataHora, hm, ymd, diaSemana, DIAS_CURTOS, nomeMes, dataLonga, addMin } from '../../lib/tempo.js'
 import { horariosLivres } from '../../lib/agenda.js'
 import { MODALIDADE } from '../../lib/util.js'
@@ -115,7 +115,7 @@ export default function AgendaAdmin() {
         <span className="ev ev-agendado ev-externo">Externo</span>
       </div>
       <DetalheAgendamento ag={aberto} config={dados?.config} fechar={() => setAberto(null)} aoMudar={recarregar} />
-      {novo && <NovoAgendamento fechar={() => setNovo(false)} aoSalvar={recarregar} />}
+      {novo && <NovoAgendamento config={dados?.config} fechar={() => setNovo(false)} aoSalvar={recarregar} />}
     </div>
   )
 }
@@ -160,24 +160,27 @@ function VisaoDia({ dia, dados, doDia, abrir }) {
   )
 }
 
-function NovoAgendamento({ fechar, aoSalvar }) {
+function NovoAgendamento({ config, fechar, aoSalvar }) {
   const avisar = useAviso()
   const { dados } = useDados(async () => {
     const [dentistas, servicos, regioes] = await Promise.all([api.dentistas(), api.servicos(), api.regioes()])
     return { dentistas: dentistas.filter((d) => d.papel === 'dentista' && d.ativo), servicos: servicos.filter((s) => s.ativo), regioes: regioes.filter((r) => r.ativo) }
   })
   const [f, setF] = useState({ dentista_id: '', servico_id: '', modalidade: 'sede', regiao_id: '', endereco: '', dia: somaDias(hoje(), 1), hora: '09:00', paciente_nome: '', paciente_telefone: '', dentes_regiao: '', observacoes: '' })
+  const [depois, setDepois] = useState(null)
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   async function salvar(e) {
     e.preventDefault()
     try {
-      await api.agendar({ ...f, inicio: dataHora(f.dia, f.hora) })
-      avisar('Agendamento criado (1 crédito do dentista foi usado).'); aoSalvar(); fechar()
+      const ag = await api.agendar({ ...f, inicio: dataHora(f.dia, f.hora) })
+      const d = dados.dentistas.find((x) => x.id === f.dentista_id)
+      avisar('Agendamento criado (1 crédito do dentista foi usado).'); aoSalvar()
+      setDepois({ numero: d?.whatsapp || d?.telefone, titulo: 'Agendamento criado.', texto: mensagensWhats({ ...ag, dentista: d }, config).confirmacao })
     } catch (er) { avisar(er.message, 'erro') }
   }
   return (
     <Modal titulo="Agendamento manual" aberto fechar={fechar} largura={640}>
-      {!dados ? <Carregando /> : (
+      {depois ? <AvisoWhats {...depois} fechar={fechar} /> : !dados ? <Carregando /> : (
         <form className="pilha" onSubmit={salvar}>
           <p className="suave pequeno">Use para agendar em nome de um dentista (ex.: pedido por WhatsApp). A antecedência mínima não se aplica, mas o dentista precisa ter crédito válido.</p>
           <div className="form">
