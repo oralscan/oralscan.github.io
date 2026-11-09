@@ -622,3 +622,45 @@ create trigger dentista_para_planilha after insert or update on public.perfis
 --     body := jsonb_build_object('token', i.planilha_token, 'tipo', 'dentista') || to_jsonb(p),
 --     headers := '{"Content-Type": "application/json"}'::jsonb)
 --   from public.perfis p, public.integracoes i where i.id = 1;
+
+-- =====================================================================
+-- LGPD: autorização OPCIONAL para contato comercial (ofertas/novidades)
+-- separada do aceite obrigatório; o dentista pode revogar no perfil.
+-- =====================================================================
+alter table public.perfis add column if not exists aceita_contato boolean not null default false;
+alter table public.perfis add column if not exists aceita_contato_em timestamptz;
+
+create or replace function public.novo_usuario() returns trigger
+language plpgsql security definer set search_path = public as $$
+declare m jsonb := coalesce(new.raw_user_meta_data, '{}'::jsonb);
+begin
+  insert into perfis (id, nome, cro, cro_uf, cpf_cnpj, clinica, telefone, whatsapp, email,
+                      endereco, bairro, cidade, cep, consentimento_lgpd, papel, aceita_contato, aceita_contato_em)
+  values (new.id, coalesce(m->>'nome',''), coalesce(m->>'cro',''), coalesce(m->>'cro_uf',''),
+          coalesce(m->>'cpf_cnpj',''), coalesce(m->>'clinica',''), coalesce(m->>'telefone',''),
+          coalesce(m->>'whatsapp',''), new.email, coalesce(m->>'endereco',''),
+          coalesce(m->>'bairro',''), coalesce(m->>'cidade',''), coalesce(m->>'cep',''),
+          case when (m->>'consentimento') = 'true' then now() end,
+          case when exists (select 1 from admins_convidados where lower(email) = lower(new.email)) then 'admin' else 'dentista' end,
+          coalesce((m->>'aceita_contato') = 'true', false),
+          case when (m->>'aceita_contato') = 'true' then now() end)
+  on conflict (id) do nothing;
+  return new;
+end $$;
+
+-- registra quando a autorização mudou; só o próprio dentista (ou o sistema) pode mudá-la
+create or replace function public.registra_aceite_contato() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if new.aceita_contato is distinct from old.aceita_contato then
+    if auth.uid() is not null and auth.uid() <> new.id then
+      new.aceita_contato := old.aceita_contato; -- admin não autoriza em nome do dentista
+    else
+      new.aceita_contato_em := now();
+    end if;
+  end if;
+  return new;
+end $$;
+drop trigger if exists registra_aceite_contato on public.perfis;
+create trigger registra_aceite_contato before update on public.perfis
+  for each row execute function public.registra_aceite_contato();
