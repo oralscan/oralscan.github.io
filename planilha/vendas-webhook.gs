@@ -28,7 +28,7 @@ const ABA_DENTISTAS = 'Dentistas';
 const COLUNAS_DENTISTAS = [
   'ID', 'Cadastrado em', 'Nome', 'E-mail', 'WhatsApp', 'Abrir conversa', 'Telefone', 'CRO',
   'CPF/CNPJ', 'Clínica', 'Endereço', 'Bairro', 'Cidade', 'CEP', 'Situação', 'Perfil',
-  'Aceite LGPD', 'Atualizado em',
+  'Aceita ofertas', 'Autorização em', 'Aceite LGPD', 'Atualizado em',
 ];
 
 function doPost(e) {
@@ -94,7 +94,9 @@ function gravarDentista(d) {
     d.id, data(d.criado_em), d.nome || '', d.email || '', fone(d.whatsapp), '', fone(d.telefone),
     d.cro ? d.cro + '/' + (d.cro_uf || '') : '', doc(d.cpf_cnpj), d.clinica || '', d.endereco || '',
     d.bairro || '', d.cidade || '', so(d.cep) ? molde(so(d.cep), '00000-000') : '', d.ativo === false ? 'Inativo' : 'Ativo',
-    d.papel === 'admin' ? 'Admin' : 'Dentista', data(d.consentimento_lgpd), new Date(),
+    d.papel === 'admin' ? 'Admin' : 'Dentista',
+    d.aceita_contato === true ? 'Sim' : 'Não', data(d.aceita_contato_em),
+    data(d.consentimento_lgpd), new Date(),
   ];
   const ids = aba.getLastRow() > 1 ? aba.getRange(2, 1, aba.getLastRow() - 1, 1).getValues().flat() : [];
   const i = ids.indexOf(d.id);
@@ -130,12 +132,13 @@ function obterAbaDentistas() {
   const ss = SpreadsheetApp.openById(PLANILHA_ID);
   let aba = ss.getSheetByName(ABA_DENTISTAS);
   if (!aba) aba = ss.insertSheet(ABA_DENTISTAS);
-  if (aba.getLastRow() === 0) {
-    aba.appendRow(COLUNAS_DENTISTAS);
-    aba.getRange(1, 1, 1, COLUNAS_DENTISTAS.length).setFontWeight('bold').setBackground('#b97f72').setFontColor('#ffffff');
+  // cabeçalho sempre igual à lista de colunas (assim colunas novas aparecem sozinhas)
+  const cab = aba.getRange(1, 1, 1, COLUNAS_DENTISTAS.length);
+  if (cab.getValues()[0].join('|') !== COLUNAS_DENTISTAS.join('|')) {
+    cab.setValues([COLUNAS_DENTISTAS]).setFontWeight('bold').setBackground('#b97f72').setFontColor('#ffffff');
     aba.setFrozenRows(1);
     aba.getRange('B:B').setNumberFormat('dd/mm/yyyy hh:mm');
-    aba.getRange('Q:R').setNumberFormat('dd/mm/yyyy hh:mm');
+    aba.getRange('R:T').setNumberFormat('dd/mm/yyyy hh:mm');
   }
   return aba;
 }

@@ -59,7 +59,8 @@ export default function Dentistas() {
                     <td className="num">{n}</td>
                     <td>
                       {p.papel === 'admin' && <Selo cor="primaria">Admin</Selo>}{' '}
-                      <Selo cor={p.ativo ? 'verde' : 'cinza'}>{p.ativo ? 'Ativo' : 'Inativo'}</Selo>
+                      <Selo cor={p.ativo ? 'verde' : 'cinza'}>{p.ativo ? 'Ativo' : 'Inativo'}</Selo>{' '}
+                      {p.aceita_contato && <Selo cor="azul">Aceita ofertas</Selo>}
                       <div className="suave pequeno">desde {dataCurta(p.criado_em)}</div>
                     </td>
                     <td className="num"><button className="btn btn-pequeno" onClick={() => setEditando({ ...p })}>Editar</button></td>

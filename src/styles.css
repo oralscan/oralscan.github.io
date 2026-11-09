@@ -387,3 +387,4 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-sp
 .dica-erro { color: var(--vermelho); font-weight: 600; }
 .dica-ok { color: var(--verde); font-weight: 600; }
 .dica-aviso { color: var(--amarelo); font-weight: 600; }
+.aceites { display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; background: #fbf7f4; border: 1px solid var(--borda); border-radius: 14px; }

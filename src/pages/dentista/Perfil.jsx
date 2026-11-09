@@ -18,6 +18,15 @@ export default function Perfil() {
     setSalvando(true)
     try { await api.salvarPerfil(p); await recarregarPerfil(); avisar('Dados atualizados.') } catch (er) { avisar(er.message, 'erro') } finally { setSalvando(false) }
   }
+  async function mudarContato(sim) {
+    setSalvando(true)
+    try {
+      await api.salvarPerfil({ ...perfil, aceita_contato: sim })
+      setP({ ...p, aceita_contato: sim })
+      await recarregarPerfil()
+      avisar(sim ? 'Pronto! Você vai receber nossas novidades.' : 'Pronto! Você não vai mais receber ofertas.')
+    } catch (er) { avisar(er.message, 'erro') } finally { setSalvando(false) }
+  }
   async function trocarSenha(e) {
     e.preventDefault()
     try { await api.novaSenha(senha); setSenha(''); avisar('Senha alterada.') } catch (er) { avisar(er.message, 'erro') }
@@ -31,6 +40,16 @@ export default function Perfil() {
         <CamposPerfil p={p} set={setP} comEmail={false} />
         <div><button className="btn btn-primario" disabled={salvando}>{salvando ? 'Salvando…' : 'Salvar dados'}</button></div>
       </form>
+      <div className="cartao pilha">
+        <h2>Comunicações</h2>
+        <label className="check">
+          <input type="checkbox" checked={!!p.aceita_contato} disabled={salvando} onChange={(e) => mudarContato(e.target.checked)} />
+          <span>Quero receber novidades, ofertas e convites da Oral Scan por WhatsApp e e-mail.</span>
+        </label>
+        <p className="pequeno suave" style={{ margin: 0 }}>
+          Avisos sobre os seus agendamentos, pagamentos e notas fiscais continuam chegando normalmente, com ou sem esta opção.
+        </p>
+      </div>
       <form className="cartao pilha" onSubmit={trocarSenha}>
         <h2>Alterar senha</h2>
         <div className="form">

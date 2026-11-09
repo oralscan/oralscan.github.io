@@ -69,7 +69,7 @@ export function Entrar() {
   )
 }
 
-export const PERFIL_VAZIO = { nome: '', cro: '', cro_uf: 'SP', cpf_cnpj: '', clinica: '', telefone: '', whatsapp: '', email: '', endereco: '', bairro: '', cidade: '', cep: '' }
+export const PERFIL_VAZIO = { nome: '', cro: '', cro_uf: 'SP', cpf_cnpj: '', clinica: '', telefone: '', whatsapp: '', email: '', endereco: '', bairro: '', cidade: '', cep: '', aceita_contato: false }
 
 export function CamposPerfil({ p, set, comEmail = true }) {
   const m = (k, mascara) => (e) => set({ ...p, [k]: mascara ? mascara(e.target.value) : e.target.value })
@@ -148,10 +148,16 @@ export function Cadastro() {
           <div className="form">
             <CampoSenha rotulo="Crie uma senha *" dica="Mínimo de 6 caracteres" autoComplete="new-password" minLength={6} value={senha} onChange={(e) => setSenha(e.target.value)} />
           </div>
-          <label className="check">
-            <input type="checkbox" checked={aceite} onChange={(e) => setAceite(e.target.checked)} />
-            <span>Li e aceito a <Link to="/privacidade" target="_blank">política de privacidade</Link> e autorizo o tratamento dos meus dados e dos dados dos pacientes que eu informar, exclusivamente para a prestação do serviço de escaneamento (LGPD).</span>
-          </label>
+          <div className="aceites">
+            <label className="check">
+              <input type="checkbox" checked={aceite} onChange={(e) => setAceite(e.target.checked)} />
+              <span><strong>Obrigatório:</strong> li e aceito a <Link to="/privacidade" target="_blank">política de privacidade</Link> e autorizo o tratamento dos meus dados e dos dados dos pacientes que eu informar para agendar e realizar os escaneamentos, emitir nota fiscal e enviar avisos sobre os meus atendimentos (LGPD).</span>
+            </label>
+            <label className="check">
+              <input type="checkbox" checked={!!p.aceita_contato} onChange={(e) => setP({ ...p, aceita_contato: e.target.checked })} />
+              <span><strong>Opcional:</strong> quero receber novidades, ofertas e convites da Oral Scan por WhatsApp e e-mail. Posso cancelar quando quiser em "Meu perfil".</span>
+            </label>
+          </div>
           {erro && <div className="alerta alerta-erro">{erro}</div>}
           <button className="btn btn-primario" disabled={enviando}>{enviando ? 'Criando…' : 'Criar cadastro'}</button>
         </form>
@@ -221,6 +227,8 @@ export function Privacidade() {
             <p>A Oral Scan trata dados pessoais conforme a Lei Geral de Proteção de Dados (Lei 13.709/2018).</p>
             <p><strong>Dados coletados:</strong> dados profissionais do dentista (nome, CRO, CPF/CNPJ, contato e endereço) e dados do paciente necessários ao escaneamento (nome, telefone opcional, região/dentes e observações clínicas).</p>
             <p><strong>Finalidade:</strong> agendar e executar o escaneamento intraoral, emitir nota fiscal e comunicar confirmações, lembretes e alterações.</p>
+            <p><strong>Comunicações comerciais (opcional):</strong> somente se o dentista autorizar no cadastro ou em "Meu perfil", seus dados de contato (nome, clínica, WhatsApp e e-mail) podem ser usados pela Oral Scan para enviar novidades, ofertas e convites. A autorização é separada do aceite desta política, não é condição para usar o app e pode ser cancelada a qualquer momento em "Meu perfil" ou pelo WhatsApp da clínica. Dados de pacientes nunca são usados para esse fim.</p>
+            <p><strong>Armazenamento:</strong> os dados ficam no banco de dados do app e em planilha de controle interno da clínica (Google), com acesso restrito à equipe da Oral Scan.</p>
             <p><strong>Compartilhamento:</strong> os dados não são vendidos nem compartilhados, exceto com o intermediador de pagamento (para processar o PIX) e quando exigido por lei.</p>
             <p><strong>Segurança:</strong> acesso individual com senha, controle por perfil (cada dentista vê apenas os próprios dados), conexão criptografada e cópias de segurança diárias.</p>
             <p><strong>Direitos:</strong> o titular pode solicitar acesso, correção ou exclusão dos dados pelo WhatsApp ou e-mail da clínica.</p>
