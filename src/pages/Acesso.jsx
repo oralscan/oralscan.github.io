@@ -25,6 +25,7 @@ function Moldura({ children }) {
       </div>
       <div className="acesso-form">
         <div className="acesso-caixa">
+          <Link to="/" className="acesso-voltar">← Conhecer o Oral Scan</Link>
           <div className="acesso-topo">
             <img src="./icon.svg" alt="" />
             <div className="marca-nome">ORAL SCAN</div>
@@ -122,7 +123,7 @@ export function Cadastro() {
   }
   return (
     <div className="conteudo" style={{ maxWidth: 760 }}>
-      <div className="linha-entre mb"><Marca /><Link to="/entrar">Já tenho cadastro</Link></div>
+      <div className="linha-entre mb"><Link to="/" style={{ textDecoration: 'none' }} aria-label="Voltar ao início"><Marca /></Link><Link to="/entrar">Já tenho cadastro</Link></div>
       <div className="cartao">
         <h1>Cadastro profissional</h1>
         <p className="suave">Preencha seus dados para agendar escaneamentos.</p>

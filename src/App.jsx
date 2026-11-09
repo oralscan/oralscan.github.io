@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, NavLink, Outlet, useNavigate } from 'react-rou
 import { api } from './lib/api.js'
 import { Carregando, Marca } from './components/ui.jsx'
 import { Entrar, Cadastro, Recuperar, NovaSenha, Privacidade } from './pages/Acesso.jsx'
+import Vitrine from './pages/Vitrine.jsx'
 import Inicio from './pages/dentista/Inicio.jsx'
 import Agendar from './pages/dentista/Agendar.jsx'
 import MeusAgendamentos from './pages/dentista/MeusAgendamentos.jsx'
@@ -55,10 +56,11 @@ export default function App() {
         <Route path="/nova-senha" element={<NovaSenha />} />
         {!usuario ? (
           <>
+            <Route path="/" element={<Vitrine />} />
             <Route path="/entrar" element={<Entrar />} />
             <Route path="/cadastro" element={<Cadastro />} />
             <Route path="/recuperar" element={<Recuperar />} />
-            <Route path="*" element={<Navigate to="/entrar" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </>
         ) : perfil && !perfil.ativo ? (
           <Route path="*" element={<Inativo />} />
