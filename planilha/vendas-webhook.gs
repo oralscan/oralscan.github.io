@@ -93,7 +93,7 @@ function gravarDentista(d) {
   const linha = [
     d.id, data(d.criado_em), d.nome || '', d.email || '', fone(d.whatsapp), '', fone(d.telefone),
     d.cro ? d.cro + '/' + (d.cro_uf || '') : '', doc(d.cpf_cnpj), d.clinica || '', d.endereco || '',
-    d.bairro || '', d.cidade || '', d.cep || '', d.ativo === false ? 'Inativo' : 'Ativo',
+    d.bairro || '', d.cidade || '', so(d.cep) ? molde(so(d.cep), '00000-000') : '', d.ativo === false ? 'Inativo' : 'Ativo',
     d.papel === 'admin' ? 'Admin' : 'Dentista', data(d.consentimento_lgpd), new Date(),
   ];
   const ids = aba.getLastRow() > 1 ? aba.getRange(2, 1, aba.getLastRow() - 1, 1).getValues().flat() : [];
