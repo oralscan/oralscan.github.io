@@ -89,19 +89,41 @@ function obterAba() {
 
 function gravarDentista(d) {
   const aba = obterAbaDentistas();
-  const digitos = String(d.whatsapp || '').replace(/[^0-9]/g, '');
-  const wa = digitos ? '=HYPERLINK("https://wa.me/' + (digitos.length <= 11 ? '55' + digitos : digitos) + '","WhatsApp")' : '';
+  const digitos = so(d.whatsapp);
   const linha = [
-    d.id, data(d.criado_em), d.nome || '', d.email || '', d.whatsapp || '', wa, d.telefone || '',
-    d.cro ? d.cro + '/' + (d.cro_uf || '') : '', d.cpf_cnpj || '', d.clinica || '', d.endereco || '',
+    d.id, data(d.criado_em), d.nome || '', d.email || '', fone(d.whatsapp), '', fone(d.telefone),
+    d.cro ? d.cro + '/' + (d.cro_uf || '') : '', doc(d.cpf_cnpj), d.clinica || '', d.endereco || '',
     d.bairro || '', d.cidade || '', d.cep || '', d.ativo === false ? 'Inativo' : 'Ativo',
     d.papel === 'admin' ? 'Admin' : 'Dentista', data(d.consentimento_lgpd), new Date(),
   ];
   const ids = aba.getLastRow() > 1 ? aba.getRange(2, 1, aba.getLastRow() - 1, 1).getValues().flat() : [];
   const i = ids.indexOf(d.id);
-  if (i >= 0) aba.getRange(i + 2, 1, 1, linha.length).setValues([linha]);
-  else aba.appendRow(linha);
+  const n = i >= 0 ? i + 2 : aba.getLastRow() + 1;
+  aba.getRange(n, 1, 1, linha.length).setValues([linha]);
+  // link clicável (não usa fórmula, então funciona em qualquer idioma da planilha)
+  const celula = aba.getRange(n, 6);
+  if (digitos) {
+    const url = 'https://wa.me/' + (digitos.length <= 11 ? '55' + digitos : digitos);
+    celula.setRichTextValue(SpreadsheetApp.newRichTextValue().setText('Abrir conversa').setLinkUrl(url).build());
+  } else {
+    celula.clearContent();
+  }
   return resposta({ ok: true });
+}
+
+// mesma pontuação do app, para cadastros antigos salvos só com números
+function so(v) { return String(v || '').replace(/[^0-9]/g, ''); }
+function molde(dig, m) { let i = 0, s = ''; for (const ch of m) { if (i >= dig.length) break; s += ch === '0' ? dig[i++] : ch; } return s; }
+function fone(v) {
+  let d = so(v);
+  if (d.length > 11 && d.indexOf('55') === 0) d = d.slice(2);
+  if (!d) return '';
+  return d.length <= 10 ? molde(d, '(00) 0000-0000') : molde(d, '(00) 00000-0000');
+}
+function doc(v) {
+  const d = so(v);
+  if (!d) return '';
+  return d.length <= 11 ? molde(d, '000.000.000-00') : molde(d, '00.000.000/0000-00');
 }
 
 function obterAbaDentistas() {
