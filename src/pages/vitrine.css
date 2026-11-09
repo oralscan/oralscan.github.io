@@ -192,3 +192,20 @@ details[open] .vt-mais::after { transform: translate(-50%, -50%) rotate(0deg); }
   .vt-flutua-2 { right: 0; top: 8%; }
   .vt-secao { padding: 56px 0; }
 }
+
+/* ---------- WhatsApp ---------- */
+.btn-whats svg { flex-shrink: 0; }
+.vt-cabeca-esq p { color: var(--suave); margin: 4px 0 16px; }
+.vt-rodape-links { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+.vt-whats { position: fixed; z-index: 41; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); display: flex; align-items: center; gap: 10px; height: 56px; padding: 0 18px 0 16px; border-radius: 999px; background: #25a35f; color: #fff; text-decoration: none; font-weight: 600; box-shadow: 0 14px 30px -8px rgba(37, 163, 95, .55), 0 4px 10px rgba(0, 0, 0, .08); transition: transform 320ms var(--ease-out), background-color 150ms ease; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.vt-whats svg { width: 26px; height: 26px; }
+.vt-whats:active { transform: scale(0.96); }
+/* no celular vira só o ícone e sobe acima da barra fixa quando ela aparece */
+@media (max-width: 759px) {
+  .vt-whats { width: 56px; padding: 0; justify-content: center; right: 14px; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); }
+  .vt-whats span { display: none; }
+  .vt-whats.subiu { transform: translateY(-74px); }
+  .vt-whats.subiu:active { transform: translateY(-74px) scale(0.96); }
+}
+@media (hover: hover) and (pointer: fine) { .vt-whats:hover { background: #1d8a4f; } }
+@media (prefers-reduced-motion: no-preference) { .vt-whats { animation: vt-sobe 600ms var(--ease-out) 800ms backwards; } }

@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import './vitrine.css'
+import { linkWhats } from '../lib/util.js'
+
+const WHATS_CLINICA = '14996772440'
+const WHATS_LINK = linkWhats(WHATS_CLINICA, 'Olá! Vim pelo site do Oral Scan e gostaria de saber mais sobre o escaneamento intraoral.')
+
+const IconeWhats = () => (
+  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.5 1 2.7c.1.2 1.8 2.8 4.4 3.9 1.6.7 2.3.8 3.1.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.2-.2-.5-.3z"/></svg>
+)
 
 const SERVICOS = [
   ['Prótese', 'Coroas, onlays, overlays e próteses fixas sem moldagem convencional.'],
@@ -202,6 +210,8 @@ export default function Vitrine() {
           <div className="vt-cabeca vt-cabeca-esq">
             <span className="vt-sobre">Dúvidas frequentes</span>
             <h2>Tudo o que você precisa saber antes de começar.</h2>
+            <p>Ficou alguma dúvida? Fale direto com a clínica.</p>
+            <a className="btn btn-whats" href={WHATS_LINK} target="_blank" rel="noopener noreferrer"><IconeWhats />Conversar no WhatsApp</a>
           </div>
           <div className="vt-duvidas">
             {DUVIDAS.map(([p, r]) => (
@@ -221,7 +231,7 @@ export default function Vitrine() {
           <p>O cadastro leva menos de dois minutos. Depois é só escolher o combo e agendar.</p>
           <div className="vt-ctas">
             <Link to="/cadastro" className="btn vt-btn-claro vt-btn-grande">Criar meu cadastro</Link>
-            <Link to="/entrar" className="vt-link-claro">Já tenho conta</Link>
+            <a href={WHATS_LINK} target="_blank" rel="noopener noreferrer" className="vt-link-claro">Tirar dúvidas no WhatsApp</a>
           </div>
         </div>
       </section>
@@ -229,9 +239,15 @@ export default function Vitrine() {
       <footer className="vt-rodape">
         <div className="vt-largura vt-rodape-in">
           <span>© {new Date().getFullYear()} Oral Scan · Dra. Tamires Bueno · CRO-SP 98.138</span>
-          <Link to="/privacidade">Política de privacidade</Link>
+          <span className="vt-rodape-links"><a href={WHATS_LINK} target="_blank" rel="noopener noreferrer">WhatsApp (14) 99677-2440</a><Link to="/privacidade">Política de privacidade</Link></span>
         </div>
       </footer>
+
+      {/* WhatsApp flutuante */}
+      <a className={`vt-whats ${rolou ? 'subiu' : ''}`} href={WHATS_LINK} target="_blank" rel="noopener noreferrer" aria-label="Falar com a clínica no WhatsApp">
+        <IconeWhats />
+        <span>Fale com a clínica</span>
+      </a>
 
       {/* barra fixa no celular */}
       <div className={`vt-barra-cel ${rolou ? 'visivel' : ''}`}>
